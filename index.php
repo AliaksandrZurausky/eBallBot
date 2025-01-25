@@ -1,61 +1,26 @@
 <?php
+ini_set('error_reporting', E_ALL);
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+const TG_TOKEN = "7796321296:AAGF3pL1raIZ1iIL7kA7iDLPXoqkOUS8X2s";
+const TG_USER_ID = "1783624604";
 
-require 'vendor/autoload.php'; // Подключаем автозагрузчик Composer
 
-use Monolog\Logger;
-use Monolog\Handler\StreamHandler;
-
-$logger = new Logger('telegram_bot');
-$logger->pushHandler(new StreamHandler('bot.log', Logger::DEBUG));
-
-define('TOKEN', '7796321296:AAGF3pL1raIZ1iIL7kA7iDLPXoqkOUS8X2s'); // Вставьте ваш токен
-
-// Список авторизованных пользователей (ID)
-$AUTHORIZED_USERS = [1783624604]; // Укажите ID пользователей, которые могут видеть кнопку
-
-function sendTelegramMessage($chat_id, $text) {
-    $url = "https://api.telegram.org/bot" . TOKEN . "/sendMessage";
-    file_get_contents($url . "?chat_id=" . $chat_id . "&text=" . urlencode($text));
-}
-
-function sendPoll($chat_id, $question, $options) {
-    $url = "https://api.telegram.org/bot" . TOKEN . "/sendPoll";
-    $data = [
-        'chat_id' => $chat_id,
-        'question' => $question,
-        'options' => json_encode($options),
-    ];
-    file_get_contents($url . '?' . http_build_query($data));
-}
-
-function processUpdate($update) {
-    global $AUTHORIZED_USERS;
-
-    $chat_id = $update['message']['chat']['id'];
-    $text = $update['message']['text'] ?? '';
-
-    if (strpos($text, '/start') === 0) {
-        if (in_array($chat_id, $AUTHORIZED_USERS)) {
-            sendTelegramMessage($chat_id, "Привет! Нажмите кнопку для создания опроса.");
-            // Отправьте кнопки (вы можете использовать inline-клавиатуру)
-        }
-    } elseif ($text == 'Создать опрос' && in_array($chat_id, $AUTHORIZED_USERS)) {
-        $question = "Ваш опрос?";
-        $options = ["Вариант 1", "Вариант 2"];
-        
-        // Рассылка опроса всем подписчикам
-        foreach ($AUTHORIZED_USERS as $user_id) {
-            sendPoll($user_id, $question, $options);
-        }
+$data = file_get_contents('php://input');
+$data = json_decode($data, true);
+function writeLogFile($string, $clear = false){
+    $log_file_name = __DIR__."/message.txt";
+    if($clear = false){
+        $now = date("Y-m-d H:i:s");
+        file_put_contents($log_file_name, $now ." ". print_r($string, true). "\r\n", FILE_APPEND);
+    }
+    else{
+        file_put_contents($log_file_name, $now ." ". print_r($string, true). "\r\n", FILE_APPEND);
     }
 }
+$data = file_get_contents('php://input');
+writeLogFile($data, true);
+echo file_get_contents(__DIR__."/message.txt");
 
-// Основной цикл
-$content = file_get_contents("php://input");
-$update = json_decode($content, true);
-
-if (isset($update['message'])) {
-    processUpdate($update);
-}
 
 ?>
