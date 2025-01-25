@@ -6,8 +6,8 @@ const TG_TOKEN = "7796321296:AAGF3pL1raIZ1iIL7kA7iDLPXoqkOUS8X2s";
 const TG_USER_ID = "1783624604";
 
 
-$data = file_get_contents('php://input');
-$data = json_decode($data, true);
+// $data = file_get_contents('php://input');
+// $data = json_decode($data, true);
 function writeLogFile($string, $clear = false){
     $log_file_name = __DIR__."/message.txt";
     $now = date("Y-m-d H:i:s");
