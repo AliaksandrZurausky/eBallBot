@@ -7,13 +7,13 @@ function sendInlineKeyboard($chatIdi) {
     $keyboard = [
         'inline_keyboard' => [
             [
-                ['text' => 'Кнопка 1', 'callback_data' => '/start_survey'],
+                ['text' => 'Запустить опрос', 'callback_data' => '/start_survey'],
 
             ]
             ]
     ];
     
     $encodedKeyboard = json_encode($keyboard);
-    file_get_contents($apiURL . "sendMessage?chat_id=$chatIdi&text=Выберите кнопку&reply_markup=$encodedKeyboard");
+    file_get_contents($apiURL . "sendMessage?chat_id=$chatIdi&text=Запуск опроса занятости&reply_markup=$encodedKeyboard");
 }
 sendInlineKeyboard($chatId);

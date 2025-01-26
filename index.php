@@ -4,6 +4,7 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 $token = "7796321296:AAGF3pL1raIZ1iIL7kA7iDLPXoqkOUS8X2s";
 $apiURL = "https://api.telegram.org/bot{$token}/";
+
 // Функция для записи ID пользователей в файл
 function readUserIds($filename) {
     if (!file_exists($filename)) {
@@ -18,6 +19,29 @@ function readUserIds($filename) {
 function writeUserIds($filename, $userIds) {
     file_put_contents($filename, implode(PHP_EOL, $userIds));
 
+}
+
+// Функция для отправки гифок
+function sendPhoto($chatIdi, $photo) {
+	global $apiURL;
+	$ch = curl_init($apiURL . 'sendAnimation');
+	$arrayQuery = [
+		'chat_id' => $chatIdi,
+		'animation' => curl_file_create(__DIR__.$photo)
+	];
+	$setoptArray =array(
+		CURLOPT_RETURNTRANSFER => true,
+		CURLOPT_POST => 1,
+		CURLOPT_HEADER => false,
+		CURLOPT_SSL_VERIFYPEER => false,
+		CURLOPT_POSTFIELDS =>$arrayQuery,
+	);
+    curl_setopt_array($ch, $setoptArray);
+    $res = curl_exec($ch);
+    print_r(json_decode($res));
+    
+
+    //file_get_contents($apiURL . "sendMessage?chat_id=$chatIdi&text=Выберите кнопку&reply_markup=$encodedKeyboard");
 }
 
 // $data = file_get_contents('php://input');
@@ -54,9 +78,7 @@ function writeLogFile($string, $clear = false){
     	// Добавляем новое число, если его нет в списке
     	if (!in_array($newUserId, $userIds) && $status!=='kicked') {
         	$userIds[] = $newUserId;
-    	}
-		// Проверка заблокировал ли пользователь бота
-		if($status == "kicked"){
+    	}elseif($status == "kicked"){
 			$userIds = array_diff($userIds, [$newUserId]);
 		}
 
@@ -69,18 +91,18 @@ function writeLogFile($string, $clear = false){
 	if($res['message']['left_chat_member']==true || $res['message']['new_chat_members']==true){
 		$newUserId = $res["message"]["from"]["id"];
     	// Читаем текущие ID пользователей
-    	$userIds = readUserIds($filenameBosses);
+    	$bossesIds = readUserIds($filenameBosses);
     	// Добавляем новое число, если его нет в списке
-    	if (!in_array($newUserId, $userIds) && $res['message']['new_chat_members']) {
-        	$userIds[] = $newUserId;
+    	if (!in_array($newUserId, $bossesIds) && $res['message']['new_chat_members']) {
+        	$bossesIds[] = $newUserId;
     	}
 		// Проверка заблокировал ли пользователь бота
 		if($res['message']['left_chat_member']){
-			$userIds = array_diff($userIds, [$newUserId]);
+			$bossesIds = array_diff($bossesIds, [$newUserId]);
 		}
 
     	// Записываем обновленный список обратно в файл
-    	writeUserIds($filenameBosses, $userIds);
+    	writeUserIds($filenameBosses, $bossesIds);
 	}
 	//-----------------------------------------------------------------------------------------------------//
 
@@ -98,10 +120,12 @@ function writeLogFile($string, $clear = false){
     	];
 		$encodedKeyboard = json_encode($keyboard);
 		$userIds = readUserIds($filename);
+		$bossesIds = readUserIds($filenameBosses);
 		if($userIds==true){
 			foreach($userIds as $value){
-				file_get_contents($apiURL . "sendMessage?chat_id={$value}&text={$sendUser}({$username}) интересуется на сколько вы заняты&reply_markup={$encodedKeyboard}");
-
+				if(!in_array($value, $bossesIds)){
+					file_get_contents($apiURL . "sendMessage?chat_id={$value}&text={$sendUser}({$username}) интересуется на сколько вы заняты&reply_markup={$encodedKeyboard}");
+				}
 			}
 		}
 	}
@@ -110,30 +134,34 @@ function writeLogFile($string, $clear = false){
 	// Получен ответ о занятости
 	switch($res['callback_query']['data']){
 		case "busy":
-			$userIds = readUserIds($filenameBosses);
-			if($userIds==true){
-				foreach($userIds as $value){
+			$gif = '/nice.gif';
+			$bossesIds = readUserIds($filenameBosses);
+			if($bossesIds==true){
+				foreach($bossesIds as $value){
 					file_get_contents($apiURL . "sendMessage?chat_id={$value}&text={$sendUser}({$username}) ЗАНЯТ!");
 				}
 				file_get_contents($apiURL . "deleteMessage?chat_id={$chat_id}&message_id={$message_id}");
+				sendPhoto($chat_id, $gif);
 			}
 			break;
 		case "supporting":
-			$userIds = readUserIds($filenameBosses);
-			if($userIds==true){
-				foreach($userIds as $value){
+			$bossesIds = readUserIds($filenameBosses);
+			if($bossesIds==true){
+				foreach($bossesIds as $value){
 					file_get_contents($apiURL . "sendMessage?chat_id={$value}&text={$sendUser}({$username}) ЗАНИМАЕТСЯ ТЕХПОДДЕРЖКОЙ!");
 				}
 				file_get_contents($apiURL . "deleteMessage?chat_id={$chat_id}&message_id={$message_id}");
 			}
 			break;
 		case "free":
-			$userIds = readUserIds($filenameBosses);
+			$gif = '/bad.gif';
+			$bossesIds = readUserIds($filenameBosses);
 			if($userIds==true){
-				foreach($userIds as $value){
+				foreach($bossesIds as $value){
 					file_get_contents($apiURL . "sendMessage?chat_id={$value}&text={$sendUser}({$username}) НЕ ЗАНЯТ!");
 				}
 				file_get_contents($apiURL . "deleteMessage?chat_id={$chat_id}&message_id={$message_id}");
+				sendPhoto($chat_id, $gif);
 			}
 			break;
 	}
