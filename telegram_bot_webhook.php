@@ -6,7 +6,7 @@ const TG_TOKEN = "7796321296:AAGF3pL1raIZ1iIL7kA7iDLPXoqkOUS8X2s";
 const TG_USER_ID = "1783624604";
 
 $getQuery = [
-    "url" => "https://manufacture.pragma.by/local/telegrambot/index.php" //Ссылка на обработчик будучих сообщений в бота
+    "url" => "https://github.com/AliaksandrZurausky/eBallBot/blob/0d6e9f0c7b62cd657f22c37fd55bb42baa102625/index.php" //Ссылка на обработчик будучих сообщений в бота
 ];
 $ch = curl_init("https://api.telegram.org/bot". TG_TOKEN."/setWebhook?".http_build_query($getQuery));
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
