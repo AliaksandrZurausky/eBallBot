@@ -2,7 +2,7 @@
 ini_set('error_reporting', E_ALL);
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
-$token = "7796321296:AAGF3pL1raIZ1iIL7kA7iDLPXoqkOUS8X2s";
+$token = "";
 $apiURL = "https://api.telegram.org/bot{$token}/";
 
 // Функция для записи ID пользователей в файл
