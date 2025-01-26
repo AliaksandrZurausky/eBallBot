@@ -156,7 +156,7 @@ function writeLogFile($string, $clear = false){
 		case "free":
 			$gif = '/bad.gif';
 			$bossesIds = readUserIds($filenameBosses);
-			if($userIds==true){
+			if($bossesIds==true){
 				foreach($bossesIds as $value){
 					file_get_contents($apiURL . "sendMessage?chat_id={$value}&text={$sendUser}({$username}) НЕ ЗАНЯТ!");
 				}

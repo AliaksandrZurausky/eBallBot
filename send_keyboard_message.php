@@ -14,6 +14,6 @@ function sendInlineKeyboard($chatIdi) {
     ];
     
     $encodedKeyboard = json_encode($keyboard);
-    file_get_contents($apiURL . "sendMessage?chat_id=$chatIdi&text=Запуск опроса занятости&reply_markup=$encodedKeyboard");
+    print_r(json_decode(file_get_contents($apiURL . "sendMessage?chat_id=$chatIdi&text=Запуск опроса занятости&reply_markup=$encodedKeyboard")));
 }
 sendInlineKeyboard($chatId);
